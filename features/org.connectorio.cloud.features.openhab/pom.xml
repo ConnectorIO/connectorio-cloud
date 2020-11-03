@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - Copyright (C) 2019-2020 ConnectorIO Sp. z o.o.
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -
+ -     http://www.apache.org/licenses/LICENSE-2.0
+ -
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+ -
+ - SPDX-License-Identifier: Apache-2.0
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.connectorio.cloud</groupId>
+    <artifactId>features</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.connectorio.cloud.features.openhab</artifactId>
+  <packaging>kar</packaging>
+
+  <name>ConnectorIO Cloud | Features | openHAB</name>
+  <description>openHAB compatible feature set.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.connectorio.cloud</groupId>
+      <artifactId>org.connectorio.cloud.device.id.openhab</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.connectorio.cloud</groupId>
+      <artifactId>org.connectorio.cloud.features.core</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Framework distribution -->
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>framework</artifactId>
+      <type>kar</type>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${karaf.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>default-features-generate-descriptor</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>features-generate-descriptor</goal>
+            </goals>
+            <configuration>
+              <primaryFeatureName>connectorio-cloud-openhab</primaryFeatureName>
+              <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+            </configuration>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                <!-- needs to be here so its features are also checked, verify-transitive option doesn't change anything -->
+                <repository>mvn:org.connectorio.cloud/org.connectorio.cloud.features.core/${project.version}/xml/features</repository>
+                <repository>mvn:org.openhab.core.features.karaf/org.openhab.core.features.karaf.openhab-core/${openhab.version}/xml/features</repository>
+              </descriptors>
+              <distribution>org.apache.karaf.features:framework</distribution>
+              <javase>11</javase>
+              <framework>
+                <feature>framework</feature>
+              </framework>
+              <features>
+                <feature>connectorio-*</feature>
+              </features>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

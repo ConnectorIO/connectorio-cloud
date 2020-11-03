@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ - Copyright (C) 2019-2020 ConnectorIO Sp. z o.o.
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -
+ -     http://www.apache.org/licenses/LICENSE-2.0
+ -
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+ -
+ - SPDX-License-Identifier: Apache-2.0
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.connectorio.cloud</groupId>
+        <artifactId>connectorio-cloud</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>parent</artifactId>
+    <packaging>pom</packaging>
+
+    <name>ConnectorIO Cloud | Parent</name>
+    <description>Parent project for ConnectorIO cloud integration.</description>
+
+    <properties>
+        <slf4j.version>1.7.12</slf4j.version>
+        <openhab.version>3.0.0-SNAPSHOT</openhab.version>
+        <karaf.version>4.2.8</karaf.version>
+
+        <nimbusds-jose-jwt.version>8.20.1</nimbusds-jose-jwt.version>
+        <nimbusds-oidc-sdk.version>8.23.1</nimbusds-oidc-sdk.version>
+
+        <zxing.version>3.4.1</zxing.version>
+
+        <maven-bundle-plugin.version>4.2.0</maven-bundle-plugin.version>
+        <osgi.version>7.0.0</osgi.version>
+        <ds-annotations.version>1.4.0</ds-annotations.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.auth.nimbus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.auth.setup</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.auth.ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.id</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.device.id.openhab</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.service.mqtt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.service.mqtt.co7io</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- bridging -->
+
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.event.mapping</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.event.item</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.features.core</artifactId>
+                <version>${project.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>org.connectorio.cloud</groupId>
+                <artifactId>org.connectorio.cloud.features.openhab</artifactId>
+                <version>${project.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>osgi.core</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>osgi.cmpn</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.component.annotations</artifactId>
+                <version>${ds-annotations.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>framework</artifactId>
+                <version>${karaf.version}</version>
+                <type>kar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>framework</artifactId>
+                <version>${karaf.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>standard</artifactId>
+                <version>${karaf.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>spring</artifactId>
+                <version>${karaf.version}</version>
+                <classifier>features</classifier>
+                <type>xml</type>
+            </dependency>
+            -->
+
+            <dependency>
+                <groupId>org.openhab.core.bundles</groupId>
+                <artifactId>org.openhab.core.id</artifactId>
+                <version>${openhab.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openhab.core.bundles</groupId>
+                <artifactId>org.openhab.core.config.discovery</artifactId>
+                <version>${openhab.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openhab.core.bundles</groupId>
+                <artifactId>org.openhab.core.io.transport.mqtt</artifactId>
+                <version>${openhab.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.14</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>karaf</artifactId>
+                <version>${karaf.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>${nimbusds-oidc-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbusds-jose-jwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.17.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>5.6.2</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven-bundle-plugin.version}</version>
+                    <configuration>
+                        <instructions>
+                            <_nouses></_nouses>
+                            <_consumer-policy>0</_consumer-policy>
+                            <_dsannotations>*</_dsannotations>
+                            <_dsannotations-options>version;minimum=1.4</_dsannotations-options>
+                            <_removeheaders>Require-Capability</_removeheaders>
+                        </instructions>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

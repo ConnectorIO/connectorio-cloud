@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ - Copyright (C) 2019-2020 ConnectorIO Sp. z o.o.
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -
+ -     http://www.apache.org/licenses/LICENSE-2.0
+ -
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+ -
+ - SPDX-License-Identifier: Apache-2.0
+ -->
+<features name="connectorio-sdk-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+    http://karaf.apache.org/xmlns/features/v1.3.0
+    http://karaf.apache.org/xmlns/features/v1.3.0
+  ">
+
+  <!--
+  The "matt-client-api" is not defined here as it is appended in platform specific feature sets!
+  -->
+
+  <feature name="connectorio-cloud" version="${project.version}" description="Connectivity via ConnectorIO Cloud">
+    <feature>connectorio-device-auth-nimbus</feature>
+    <feature>connectorio-device-auth-setup</feature>
+    <feature>connectorio-device-auth-ui</feature>
+    <feature>connectorio-event-item</feature>
+  </feature>
+
+  <!-- Provided features -->
+  <feature name="connectorio-service" version="${project.version}" description="Cloud Service API">
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-service-mqtt" version="${project.version}" description="Cloud Service MQTT API">
+    <feature>mqtt-client-api</feature>
+    <feature>connectorio-service</feature>
+    <feature>connectorio-device-auth</feature>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-event-mapping" version="${project.version}" description="Event Mapping">
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.mapping/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-event-item" version="${project.version}" description="Item Event OIntegration">
+    <feature>connectorio-service-mqtt</feature>
+    <feature>connectorio-event-mapping</feature>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.item/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-auth" version="${project.version}" description="Device Authentication API">
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-id" version="${project.version}" description="Device Identification API">
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.id/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-auth-nimbus" version="${project.version}" description="Device authentication implementation">
+    <feature version="${nimbusds-oidc-sdk.version}">nimbus-sdk</feature>
+    <feature>connectorio-device-auth</feature>
+    <config name="org.connectorio.cloud.device.auth">
+      authURI=https://auth.connectorio.cloud/realms/connectorio.cloud/protocol/openid-connect/device/auth
+      tokenURI=https://auth.connectorio.cloud/realms/connectorio.cloud/protocol/openid-connect/token
+      clientId=connectorio-gateway
+    </config>
+
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-auth-setup" version="${project.version}" description="Device authentication setup listener.">
+    <feature>connectorio-device-auth</feature>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth.setup/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-auth-ui" version="${project.version}" description="Device authentication UI">
+    <feature version="${zxing.version}">zxing</feature>
+    <feature>http</feature>
+    <feature>connectorio-device-auth</feature>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth.ui/${project.version}</bundle>
+  </feature>
+
+  <!-- Third party dependencies -->
+  <feature name="jcip-annotations" version="1.0-1" hidden="true">
+    <feature prerequisite="true">wrap</feature>
+    <bundle>wrap:mvn:com.github.stephenc.jcip/jcip-annotations/1.0-1</bundle>
+  </feature>
+
+  <feature name="mail-api" version="1.6.2" hidden="true">
+    <feature prerequisite="true">wrap</feature>
+    <bundle>wrap:mvn:javax.mail/javax.mail-api/1.6.2</bundle>
+    <bundle>mvn:com.sun.mail/javax.mail/1.6.2</bundle>
+  </feature>
+
+  <feature name="nimbus-sdk" version="${nimbusds-oidc-sdk.version}" hidden="true">
+    <feature prerequisite="true">wrap</feature>
+    <feature>jcip-annotations</feature>
+    <feature>mail-api</feature>
+    <feature>http</feature>
+
+    <bundle>wrap:mvn:net.minidev/accessors-smart/1.2$overwrite=merge&amp;Import-Package=*</bundle>
+    <bundle>mvn:net.minidev/json-smart/2.3</bundle>
+    <bundle>mvn:com.nimbusds/lang-tag/1.4.4</bundle>
+    <bundle>mvn:com.nimbusds/content-type/2.1</bundle>
+    <bundle>mvn:com.nimbusds/nimbus-jose-jwt/${nimbusds-jose-jwt.version}</bundle>
+    <bundle>mvn:com.nimbusds/oauth2-oidc-sdk/${nimbusds-oidc-sdk.version}</bundle>
+  </feature>
+
+  <feature name="zxing" version="${zxing.version}" description="QRCode and barcode generator" hidden="true">
+    <feature prerequisite="true">wrap</feature>
+    <bundle>wrap:mvn:com.google.zxing/core/${zxing.version}</bundle>
+    <bundle>wrap:mvn:com.google.zxing/javase/${zxing.version}</bundle>
+  </feature>
+
+</features>
