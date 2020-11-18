@@ -33,7 +33,7 @@ public class OpenHABDeviceIdentifierProvider implements DeviceIdentifierProvider
   @Override
   public HashIdentifier getIdentifier() {
     String instanceUUID = new DigestUtils(HASH_ALGORITHM).digestAsHex(InstanceUUID.get());
-    return new HashIdentifier( HASH_ALGORITHM, instanceUUID);
+    return new HashIdentifier(HASH_ALGORITHM, instanceUUID);
   }
 
   @Override

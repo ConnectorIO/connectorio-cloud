@@ -55,7 +55,6 @@ import org.connectorio.cloud.device.id.DeviceIdentifierProvider;
 import org.connectorio.cloud.device.id.DeviceIdentifierType;
 import org.connectorio.cloud.device.id.DeviceIdentityTypes;
 import org.connectorio.cloud.device.id.standard.CertificateIdentifier;
-import org.connectorio.cloud.device.id.standard.HashIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -119,7 +118,7 @@ public class NimbusDeviceAuthenticator implements DeviceAuthenticator {
 
       if (!response.indicatesSuccess()) {
         DeviceAuthorizationErrorResponse errorResponse = response.toErrorResponse();
-        throw new RuntimeException("Could not finish request " + errorResponse.getErrorObject().getDescription());
+        throw new RuntimeException("Could not finish request. Server returned code " + errorResponse.getErrorObject().getHTTPStatusCode() + " and description " + errorResponse.getErrorObject().getDescription());
       }
 
       DeviceAuthorizationSuccessResponse successResponse = response.toSuccessResponse();
@@ -174,18 +173,13 @@ public class NimbusDeviceAuthenticator implements DeviceAuthenticator {
       httpRequest.setClientX509Certificate(certificate.getClientCertificate());
       return;
     }
-    logger.error("Could not fetch device certificate");
+    logger.debug("Could not fetch device certificate, sending HTTP request without client certificate.");
   }
 
   private void append(Builder builder, DeviceIdentifierProvider<DeviceIdentifier> provider) {
     final DeviceIdentifier identifier = provider.getIdentifier();
-    if (identifier instanceof HashIdentifier) {
-      HashIdentifier hash = (HashIdentifier) identifier;
-      builder.customParameter(provider.getIdentityType().getType() + "Hash", hash.getHash());
-      builder.customParameter(provider.getIdentityType().getType() + "Algorithm", hash.getAlgorithm());
-      return;
-    }
-    builder.customParameter(provider.getIdentityType().getType(), identifier.toString());
+    final String requestParamName = "deviceId." + provider.getIdentityType().getType();
+    builder.customParameter(requestParamName, identifier.toString());
   }
 
   private <X extends DeviceIdentifier> Stream<DeviceIdentifierProvider<X>> deviceIds(Predicate<DeviceIdentifierType<?>> predicate) {

@@ -39,6 +39,11 @@ public class HashIdentifier implements DeviceIdentifier {
   }
 
   @Override
+  public String toString() {
+    return "{" + algorithm + "}" + hash;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

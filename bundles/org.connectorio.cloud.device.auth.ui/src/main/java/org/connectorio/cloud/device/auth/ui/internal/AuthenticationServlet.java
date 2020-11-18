@@ -42,7 +42,7 @@ public class AuthenticationServlet extends HttpServlet {
     } else {
       resp.getWriter().println("<h2>Device authenticated</h2>");
       resp.getWriter().println("Device ID: " + authentication.getDeviceId());
-      resp.getWriter().println("Tenant ID: " + authentication.getOrganizationId());
+      resp.getWriter().println("Organization ID: " + authentication.getOrganizationId());
       resp.getWriter().println("Expiration: " + authentication.getExpirationTime());
       resp.getWriter().println("<a href=\"/device/auth\">Reauthenticate</a>");
     }

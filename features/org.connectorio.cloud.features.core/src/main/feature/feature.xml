@@ -73,7 +73,7 @@
       clientId=connectorio-gateway
     </config>
 
-    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth/${project.version}</bundle>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth.nimbus/${project.version}</bundle>
   </feature>
 
   <feature name="connectorio-device-auth-setup" version="${project.version}" description="Device authentication setup listener.">
