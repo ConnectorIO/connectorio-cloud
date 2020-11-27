@@ -23,8 +23,6 @@
     http://karaf.apache.org/xmlns/features/v1.3.0
   ">
 
-  <repository>mvn:org.connectorio.cloud/org.connectorio.cloud.features.core/${project.version}/xml/features</repository>
-
   <feature name="mqtt-client-api" version="${project.version}" description="MQTT client API" hidden="true">
     <feature>openhab-transport-mqtt</feature>
   </feature>

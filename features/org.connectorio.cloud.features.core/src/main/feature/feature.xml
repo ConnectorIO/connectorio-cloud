@@ -66,6 +66,7 @@
 
   <feature name="connectorio-device-auth-nimbus" version="${project.version}" description="Device authentication implementation">
     <feature version="${nimbusds-oidc-sdk.version}">nimbus-sdk</feature>
+    <feature>connectorio-device-id</feature>
     <feature>connectorio-device-auth</feature>
     <config name="org.connectorio.cloud.device.auth">
       authURI=https://auth.connectorio.cloud/realms/connectorio.cloud/protocol/openid-connect/device/auth
