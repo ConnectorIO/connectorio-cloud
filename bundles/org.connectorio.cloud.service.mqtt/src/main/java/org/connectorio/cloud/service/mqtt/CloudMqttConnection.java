@@ -19,7 +19,7 @@ package org.connectorio.cloud.service.mqtt;
 
 import org.connectorio.cloud.device.auth.DeviceAuthentication;
 import org.connectorio.cloud.service.CloudService;
-import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 
 public interface CloudMqttConnection extends CloudService {
 

@@ -31,7 +31,7 @@ import org.connectorio.cloud.service.CloudServiceType;
 import org.connectorio.cloud.service.mqtt.CloudMqttConnection;
 import org.connectorio.cloud.service.mqtt.MqttConnectionState;
 import org.connectorio.cloud.service.standard.NamedCloudServiceType;
-import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;

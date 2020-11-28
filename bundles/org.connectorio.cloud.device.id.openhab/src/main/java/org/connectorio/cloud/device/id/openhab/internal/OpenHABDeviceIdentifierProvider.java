@@ -22,7 +22,7 @@ import org.connectorio.cloud.device.id.DeviceIdentifierProvider;
 import org.connectorio.cloud.device.id.DeviceIdentifierType;
 import org.connectorio.cloud.device.id.DeviceIdentityTypes;
 import org.connectorio.cloud.device.id.standard.HashIdentifier;
-import org.openhab.core.id.InstanceUUID;
+import org.eclipse.smarthome.core.id.InstanceUUID;
 import org.osgi.service.component.annotations.Component;
 
 @Component
