@@ -35,7 +35,7 @@
 
     <properties>
         <slf4j.version>1.7.12</slf4j.version>
-        <openhab.version>3.0.0.M3</openhab.version>
+        <openhab.version>3.0.0.M4</openhab.version>
         <karaf.version>4.2.8</karaf.version>
 
         <nimbusds-jose-jwt.version>8.20.1</nimbusds-jose-jwt.version>
