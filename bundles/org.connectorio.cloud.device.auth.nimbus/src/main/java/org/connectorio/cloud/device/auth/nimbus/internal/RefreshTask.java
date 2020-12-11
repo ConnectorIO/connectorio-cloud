@@ -105,7 +105,7 @@ class RefreshTask extends TimerTask {
 
   /**
    * Basic backoff calculation which simply delays refresh depending on number of previous failures.
-   * Few words - if token expires in less than minute, then attempt will be made in 25s.
+   * Few words - if token expires in less than minute, then attempt will be made in 10s.
    * If number of failures is 0 so far, we wait 60s. For all subsequent requests method will return 10, 40, 90s and 160s.
    * Any failure after fourth will delay execution by 5 minutes.
    *
@@ -117,7 +117,7 @@ class RefreshTask extends TimerTask {
    */
   private int calculateBackoff(long remainingTime) {
     if (remainingTime < 60_000) {
-      return 25_000;
+      return 10_000;
     }
 
     if (failures == 0) {
