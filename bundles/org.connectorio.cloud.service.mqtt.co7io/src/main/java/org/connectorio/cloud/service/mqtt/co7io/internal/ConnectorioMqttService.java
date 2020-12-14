@@ -77,10 +77,12 @@ public class ConnectorioMqttService implements CloudMqttConnection {
     this.authentication = authentication;
     Configuration configuration = configurationAdmin.getConfiguration("org.connectorio.cloud.service.mqtt.co7io");
     host = resolveOption(configuration, "host", Object::toString, () -> DEFAULT_HOST);
-    port = resolveOption(configuration, "port", (v -> Integer.parseInt(v.toString())), () -> 1883);
+    port = resolveOption(configuration, "port", (v -> Integer.parseInt(v.toString())), () -> 8883);
     secure = resolveOption(configuration, "secure", (v -> Boolean.parseBoolean(v.toString())), () -> Boolean.TRUE);
 
-    connection = new MqttBrokerConnection(host, port, secure, "connectorio." + UUID.randomUUID()) {
+    // hm.. can it become stale once device is re-authenticated to different organization?
+    String clientId = authentication.getOrganizationId() + "." + authentication.getDeviceId();
+    connection = new MqttBrokerConnection(host, port, secure, clientId) {
       @Override
       public CompletableFuture<Boolean> start() {
         // inject credentials right before connection attempt is made
