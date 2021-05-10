@@ -26,30 +26,20 @@
     <version>0.2.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.connectorio.cloud.service.mqtt.co7io</artifactId>
+  <artifactId>org.connectorio.cloud.service.proxy</artifactId>
   <packaging>bundle</packaging>
 
-  <name>ConnectorIO Cloud | Bundles | Service | MQTT | co7io</name>
-  <description>ConnectorIO Cloud MQTT service.</description>
+  <name>ConnectorIO Cloud | Bundles | Service | Proxy</name>
+  <description>Proxy through websocket client connection.</description>
 
   <dependencies>
     <dependency>
       <groupId>org.connectorio.cloud</groupId>
-      <artifactId>org.connectorio.cloud.device.auth</artifactId>
+      <artifactId>org.connectorio.cloud.service</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.connectorio.cloud</groupId>
-      <artifactId>org.connectorio.cloud.service.mqtt</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.component.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi.cmpn</artifactId>
+      <artifactId>org.connectorio.cloud.device.auth</artifactId>
     </dependency>
   </dependencies>
 

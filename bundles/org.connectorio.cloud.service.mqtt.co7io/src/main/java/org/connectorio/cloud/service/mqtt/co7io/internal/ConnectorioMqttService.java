@@ -39,7 +39,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
-@Component(service = {CloudService.class, CloudMqttConnection.class})
+@Component(immediate = true, service = {CloudService.class, CloudMqttConnection.class})
 public class ConnectorioMqttService implements CloudMqttConnection {
 
   private final static String DEFAULT_HOST = "mqtt.connectorio.cloud";

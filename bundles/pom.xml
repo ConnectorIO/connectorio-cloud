@@ -45,6 +45,8 @@
     <module>org.connectorio.cloud.service</module>
     <module>org.connectorio.cloud.service.mqtt</module>
     <module>org.connectorio.cloud.service.mqtt.co7io</module>
+    <module>org.connectorio.cloud.service.proxy</module>
+    <module>org.connectorio.cloud.service.proxy.co7io</module>
     <!-- -->
     <module>org.connectorio.cloud.event.mapping</module>
     <module>org.connectorio.cloud.event.item</module>
