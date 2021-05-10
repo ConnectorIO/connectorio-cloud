@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import org.connectorio.cloud.device.auth.DeviceAuthentication;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -45,10 +46,10 @@ import org.slf4j.LoggerFactory;
 
 @Component(configurationPid = "org.connectorio.cloud.device.auth.token", configurationPolicy = ConfigurationPolicy.REQUIRE,
   property = {
-    //Constants.SERVICE_PID + "=org.connectorio.cloud.device.auth.token",
-    "service.config.label = Device Authentication Token",
-    "service.config.category = ConnectorIO Cloud",
-    "service.config.description_uri = connectorio:device-auth-token"
+    Constants.SERVICE_PID + "=org.connectorio.cloud.device.auth.token",
+    "service.config.label=Device Authentication Token",
+    "service.config.category=ConnectorIO Cloud",
+    "service.config.description.uri=connectorio:device-auth-token",
   }
 )
 public class NimbusDeviceAuthentication implements DeviceAuthentication {

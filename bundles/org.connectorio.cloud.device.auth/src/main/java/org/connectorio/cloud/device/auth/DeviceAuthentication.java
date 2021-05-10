@@ -21,6 +21,11 @@ import java.util.Date;
 
 public interface DeviceAuthentication {
 
+  /**
+   * Returns access token to communicate with cloud services.
+   *
+   * @return Access token or null if no valid token found.
+   */
   String getAccessToken();
 
   /**

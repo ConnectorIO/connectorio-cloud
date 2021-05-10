@@ -202,7 +202,7 @@ public class NimbusDeviceAuthenticator implements DeviceAuthenticator {
     callbacks.remove(callback);
   }
 
-  @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+  @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
   public void addDeviceIdentifierProvider(DeviceIdentifierProvider<?> identifierProvider) {
     deviceIdentifierProviders.add(identifierProvider);
   }

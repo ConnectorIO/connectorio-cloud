@@ -17,16 +17,17 @@
  */
 package org.connectorio.cloud.device.auth.nimbus.internal;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 @Component(configurationPid = "org.connectorio.cloud.device.auth", service = AuthServiceConfiguration.class,
   configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
-    //Constants.SERVICE_PID + "=org.connectorio.cloud.device.auth",
+    Constants.SERVICE_PID + "=org.connectorio.cloud.device.auth",
     "service.config.label=Device Authentication",
     "service.config.category=ConnectorIO Cloud",
-    "service.config.description_uri=connectorio:device-auth"
+    "service.config.description.uri=connectorio:device-auth",
   }
 )
 public class AuthServiceConfiguration {
