@@ -23,8 +23,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Builder;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,6 +39,9 @@ import org.connectorio.cloud.service.proxy.ProxyConnectionState;
 import org.connectorio.cloud.service.proxy.co7io.internal.reconnect.ReconnectStrategy;
 import org.connectorio.cloud.service.proxy.co7io.internal.reconnect.SimpleReconnectStrategy;
 import org.connectorio.cloud.service.standard.NamedCloudServiceType;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.events.ItemStateEvent;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -47,8 +51,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, service = {CloudService.class, CloudProxyConnection.class})
-public class ConnectorioProxyService implements CloudProxyConnection {
+@Component(immediate = true, service = {CloudService.class, CloudProxyConnection.class, EventSubscriber.class})
+public class ConnectorioProxyService implements CloudProxyConnection, EventSubscriber {
 
   private final static String DEFAULT_HOST = "proxy.connectorio.cloud";
   public static final int WEBSOCKET_MESSAGE_LIMIT = 65536;
@@ -63,6 +67,7 @@ public class ConnectorioProxyService implements CloudProxyConnection {
   private final ReconnectStrategy reconnectStrategy;
 
   private WebSocket connection;
+  private WebSocketListener listener;
 
   @Activate
   public ConnectorioProxyService(@Reference DeviceAuthentication authentication, @Reference ConfigurationAdmin configurationAdmin) throws IOException {
@@ -96,11 +101,18 @@ public class ConnectorioProxyService implements CloudProxyConnection {
   }
 
   public void connect() {
+    if (authentication.getAccessToken() == null || authentication.getDeviceId() == null || authentication.getOrganizationId() == null) {
+      logger.info("Authentication information is missing, please re-authenticate device");
+      return;
+    }
+
     Builder webSocketBuilder = HttpClient.newHttpClient().newWebSocketBuilder()
         .header("Authorization", authentication.getAccessToken());
+
     URI serverUri = URI.create((secure ? "wss://" : "ws://") + host + ":" + port + "/connect");
     logger.info("Launching WebSocket connection to {}", serverUri);
-    webSocketBuilder.buildAsync(serverUri, new WebSocketListener(HttpClient.newBuilder().version(Version.HTTP_1_1).build(), reconnectStrategy))
+    listener = new WebSocketListener(HttpClient.newBuilder().version(Version.HTTP_1_1).build(), reconnectStrategy);
+    webSocketBuilder.buildAsync(serverUri, listener)
       .whenComplete((response, error) -> {
         if (error != null) {
           logger.error("Could not open web socket connection", error);
@@ -121,8 +133,15 @@ public class ConnectorioProxyService implements CloudProxyConnection {
   @Deactivate
   public void deactivate() {
     reconnectStrategy.shutdown();
-    connection.sendClose(WebSocket.NORMAL_CLOSURE, "connection deactivation")
-      .join(); // block until completion of disconnect request
+    if (connection != null) {
+      connection.sendClose(WebSocket.NORMAL_CLOSURE, "connection deactivation")
+        .join(); // block until completion of disconnect request
+      connection = null;
+    }
+
+    if (listener != null) {
+      listener = null;
+    }
   }
 
   @Override
@@ -133,6 +152,28 @@ public class ConnectorioProxyService implements CloudProxyConnection {
   @Override
   public WebSocket getClient() {
     return connection;
+  }
+
+  @Override
+  public Set<String> getSubscribedEventTypes() {
+    return Set.of(EventSubscriber.ALL_EVENT_TYPES);
+  }
+
+  @Override
+  public EventFilter getEventFilter() {
+    return null;
+  }
+
+  @Override
+  public void receive(org.openhab.core.events.Event event) {
+    if (listener != null) {
+      if (event instanceof ItemStateEvent) {
+        ItemStateEvent item = (ItemStateEvent) event;
+        listener.send(new StatesEvent(item.getItemName(), new State("" + item.getItemState(), "" + item.getItemState())));
+      } else {
+        listener.send(new Event(event.getTopic(), event.getPayload(), event.getType()));
+      }
+    }
   }
 
 }

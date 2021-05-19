@@ -46,6 +46,12 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt/${project.version}</bundle>
   </feature>
 
+  <feature name="connectorio-service-proxy" version="${project.version}" description="Cloud Proxy Service API">
+    <feature>connectorio-service</feature>
+    <feature>connectorio-device-auth</feature>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.proxy/${project.version}</bundle>
+  </feature>
+
   <feature name="connectorio-event-mapping" version="${project.version}" description="Event Mapping">
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.mapping/${project.version}</bundle>
   </feature>

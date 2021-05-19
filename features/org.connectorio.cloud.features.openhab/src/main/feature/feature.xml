@@ -42,10 +42,20 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt.co7io/${project.version}</bundle>
   </feature>
 
+  <feature name="connectorio-service-proxy-co7io" version="${project.version}" description="MQTT Bridge Bootstrap">
+    <feature>openhab.tp-jackson</feature>
+    <feature>openhab-core-base</feature>
+    <feature>connectorio-service-proxy</feature>
+    <feature>connectorio-device-auth</feature>
+
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.proxy.co7io/${project.version}</bundle>
+  </feature>
+
   <feature name="connectorio-cloud-openhab" version="${project.version}" description="ConnectorIO Cloud - openHAB integration">
     <feature>connectorio-device-id</feature>
     <feature>connectorio-device-id-openhab</feature>
     <feature>connectorio-service-mqtt-co7io</feature>
+    <feature>connectorio-service-proxy-co7io</feature>
     <feature>connectorio-cloud</feature>
   </feature>
 

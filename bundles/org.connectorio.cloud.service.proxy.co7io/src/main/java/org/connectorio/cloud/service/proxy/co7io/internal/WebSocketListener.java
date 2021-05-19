@@ -17,6 +17,7 @@
  */
 package org.connectorio.cloud.service.proxy.co7io.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -93,7 +94,8 @@ public class WebSocketListener implements Listener {
               .method(jsonRequest.getMethod(), BodyPublishers.ofByteArray(jsonRequest.getPayload()));
 
           for (Entry<String, String> entry : jsonRequest.getHeaders().entrySet()) {
-            if (entry.getKey().equalsIgnoreCase("Host") || entry.getKey().equalsIgnoreCase("Content-Length")) {
+            if (entry.getKey().equalsIgnoreCase("Host") || entry.getKey().equalsIgnoreCase("Content-Length")
+                || entry.getKey().equalsIgnoreCase("Connection") || entry.getKey().equalsIgnoreCase("Upgrade") ) {
               continue;
             }
             builder.header(entry.getKey(), entry.getValue());
@@ -177,6 +179,14 @@ public class WebSocketListener implements Listener {
       }
     }
     Listener.super.onError(webSocket, error);
+  }
+
+  public void send(TextEvent event) {
+    try {
+      webSocket.sendText(mapper.writeValueAsString(event), true);
+    } catch (JsonProcessingException e) {
+      logger.warn("Failed to send state update", e);
+    }
   }
 
   private void setState(ProxyConnectionState state) {
