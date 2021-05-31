@@ -31,7 +31,9 @@
     <feature>connectorio-device-auth-nimbus</feature>
     <feature>connectorio-device-auth-setup</feature>
     <feature>connectorio-device-auth-ui</feature>
+    <!--
     <feature>connectorio-event-item</feature>
+    -->
   </feature>
 
   <!-- Provided features -->
@@ -39,12 +41,14 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service/${project.version}</bundle>
   </feature>
 
+  <!--
   <feature name="connectorio-service-mqtt" version="${project.version}" description="Cloud Service MQTT API">
     <feature>mqtt-client-api</feature>
     <feature>connectorio-service</feature>
     <feature>connectorio-device-auth</feature>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt/${project.version}</bundle>
   </feature>
+  -->
 
   <feature name="connectorio-service-proxy" version="${project.version}" description="Cloud Proxy Service API">
     <feature>connectorio-service</feature>
@@ -52,6 +56,7 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.proxy/${project.version}</bundle>
   </feature>
 
+  <!--
   <feature name="connectorio-event-mapping" version="${project.version}" description="Event Mapping">
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.mapping/${project.version}</bundle>
   </feature>
@@ -61,9 +66,27 @@
     <feature>connectorio-event-mapping</feature>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.item/${project.version}</bundle>
   </feature>
+  -->
 
   <feature name="connectorio-device-auth" version="${project.version}" description="Device Authentication API">
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-device-auth-production" version="${project.version}" description="Device Authentication API">
+    <feature>connectorio-device-auth</feature>
+    <config name="org.connectorio.cloud.device.auth">
+      authURI=https://auth.connectorio.cloud/auth/realms/connectorio.cloud/protocol/openid-connect/device/auth
+      tokenURI=https://auth.connectorio.cloud/auth/realms/connectorio.cloud/protocol/openid-connect/token
+      clientId=connectorio-gateway
+    </config>
+  </feature>
+  <feature name="connectorio-device-auth-development" version="${project.version}" description="Device Authentication API">
+    <feature>connectorio-device-auth</feature>
+    <config name="org.connectorio.cloud.device.auth">
+      authURI=https://auth.connectorio.dev/auth/realms/connectorio.cloud/protocol/openid-connect/device/auth
+      tokenURI=https://auth.connectorio.dev/auth/realms/connectorio.cloud/protocol/openid-connect/token
+      clientId=connectorio-gateway
+    </config>
   </feature>
 
   <feature name="connectorio-device-id" version="${project.version}" description="Device Identification API">
@@ -75,8 +98,10 @@
     <feature>connectorio-device-id</feature>
     <feature>connectorio-device-auth</feature>
     <config name="org.connectorio.cloud.device.auth">
-      authURI=https://auth.connectorio.cloud/realms/connectorio.cloud/protocol/openid-connect/device/auth
-      tokenURI=https://auth.connectorio.cloud/realms/connectorio.cloud/protocol/openid-connect/token
+      #authURI=https://auth.connectorio.dev/auth/realms/connectorio.cloud/protocol/openid-connect/device/auth
+      #tokenURI=https://auth.connectorio.dev/auth/realms/connectorio.cloud/protocol/openid-connect/token
+      authURI=https://auth.connectorio.cloud/auth/realms/connectorio.cloud/protocol/openid-connect/device/auth
+      tokenURI=https://auth.connectorio.cloud/auth/realms/connectorio.cloud/protocol/openid-connect/token
       clientId=connectorio-gateway
     </config>
 
@@ -93,6 +118,10 @@
     <feature>http</feature>
     <feature>connectorio-device-auth</feature>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth.ui/${project.version}</bundle>
+  </feature>
+
+  <feature name="connectorio-cloud-core" version="${project.version}">
+
   </feature>
 
   <!-- Third party dependencies -->

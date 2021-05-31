@@ -19,7 +19,7 @@
 <features name="connectorio-sdk-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="
-    http://karaf.apache.org/xmlns/features/v1.3.0
+    http://karaf.apache.org/xmln``s/features/v1.3.0
     http://karaf.apache.org/xmlns/features/v1.3.0
   ">
 
@@ -30,10 +30,11 @@
   <feature name="connectorio-device-id-openhab" version="${project.version}" description="openHAB device identification">
     <feature>connectorio-device-id</feature>
     <feature>openhab-core-base</feature>
-    <bundle dependency="true">mvn:commons-codec/commons-codec/1.14</bundle>
+    <bundle>mvn:commons-codec/commons-codec/1.14</bundle>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.id.openhab/${project.version}</bundle>
   </feature>
 
+  <!--
   <feature name="connectorio-service-mqtt-co7io" version="${project.version}" description="MQTT Bridge Bootstrap">
     <feature>connectorio-service-mqtt</feature>
     <feature>connectorio-device-auth</feature>
@@ -41,20 +42,49 @@
 
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt.co7io/${project.version}</bundle>
   </feature>
+  -->
 
-  <feature name="connectorio-service-proxy-co7io" version="${project.version}" description="MQTT Bridge Bootstrap">
+  <feature name="connectorio-service-proxy-co7io" version="${project.version}" description="Proxy service" hidden="true">
     <feature>openhab.tp-jackson</feature>
     <feature>openhab-core-base</feature>
     <feature>connectorio-service-proxy</feature>
-    <feature>connectorio-device-auth</feature>
+    <feature>connectorio-device-auth-nimbus</feature>
+    <feature>connectorio-device-auth-ui</feature>
+    <feature>connectorio-device-auth-setup</feature>
+    <feature>connectorio-device-id-openhab</feature>
 
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.proxy.co7io/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-misc-service-proxy-co7io-development" version="${project.version}" description="Proxy service going over development servers (connectorio.dev)">
+    <feature>connectorio-service-proxy-co7io</feature>
+    <feature>connectorio-device-auth-development</feature>
+    <config name="org.connectorio.cloud.service.proxy.co7io">
+      host = proxy.connectorio.dev
+      port = 443
+      secure = true
+
+      forwardHost = 127.0.0.1
+      forwardPort = 8080
+    </config>
+  </feature>
+
+  <feature name="openhab-misc-service-proxy-co7io-production" version="${project.version}" description="Proxy service going over production servers (connectorio.cloud)">
+    <feature>connectorio-service-proxy-co7io</feature>
+    <feature>connectorio-device-auth-production</feature>
+    <config name="org.connectorio.cloud.service.proxy.co7io">
+      host = proxy.connectorio.cloud
+      port = 443
+      secure = true
+
+      forwardHost = 127.0.0.1
+      forwardPort = 8080
+    </config>
   </feature>
 
   <feature name="connectorio-cloud-openhab" version="${project.version}" description="ConnectorIO Cloud - openHAB integration">
     <feature>connectorio-device-id</feature>
     <feature>connectorio-device-id-openhab</feature>
-    <feature>connectorio-service-mqtt-co7io</feature>
     <feature>connectorio-service-proxy-co7io</feature>
     <feature>connectorio-cloud</feature>
   </feature>

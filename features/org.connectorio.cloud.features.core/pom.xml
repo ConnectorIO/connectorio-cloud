@@ -81,6 +81,12 @@
       <artifactId>org.connectorio.cloud.service.mqtt.co7io</artifactId>
     </dependency>
 
+    <dependency>
+      <!-- force inclusion in KAR -->
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+
     <!-- Framework distribution -->
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
@@ -97,8 +103,26 @@
         <artifactId>karaf-maven-plugin</artifactId>
         <version>${karaf.version}</version>
         <extensions>true</extensions>
-  <!--
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifestEntries>
+              <Karaf-Feature-Start>false</Karaf-Feature-Start>
+            </manifestEntries>
+          </archive>
+        </configuration>
         <executions>
+          <execution>
+            <id>default-features-generate-descriptor</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>features-generate-descriptor</goal>
+            </goals>
+            <configuration>
+              <primaryFeatureName>connectorio-cloud-core</primaryFeatureName>
+              <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+            </configuration>
+          </execution>
           <execution>
             <id>verify</id>
             <phase>integration-test</phase>
@@ -122,7 +146,6 @@
             </configuration>
           </execution>
         </executions>
-  -->
       </plugin>
     </plugins>
   </build>

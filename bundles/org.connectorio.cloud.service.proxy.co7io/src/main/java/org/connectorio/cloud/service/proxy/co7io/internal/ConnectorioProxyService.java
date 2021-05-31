@@ -48,13 +48,24 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, service = {CloudService.class, CloudProxyConnection.class, EventSubscriber.class})
+@Component(immediate = true, service = {CloudService.class, CloudProxyConnection.class, EventSubscriber.class},
+  property = {
+    Constants.SERVICE_PID + "=" + ConnectorioProxyService.SERVICE_PID,
+    "service.config.label=ConnectorIO Proxy",
+    "service.config.category=ConnectorIO Cloud",
+    "service.config.description.uri=connectorio:proxy",
+  })
 public class ConnectorioProxyService implements CloudProxyConnection, EventSubscriber {
 
+  public static final String SERVICE_PID = "org.connectorio.cloud.service.proxy.co7io";
+
   private final static String DEFAULT_HOST = "proxy.connectorio.cloud";
+  private final static String DEFAULT_FORWARD_HOST = "127.0.0.1";
+  private final static int DEFAULT_FORWARD_PORT = 8080;
   public static final int WEBSOCKET_MESSAGE_LIMIT = 65536;
 
   private final Logger logger = LoggerFactory.getLogger(ConnectorioProxyService.class);
@@ -63,6 +74,8 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
   private final String host;
   private final int port;
   private final boolean secure;
+  private final String forwardHost;
+  private final int forwardPort;
   private final DeviceAuthentication authentication;
   private final ReconnectStrategy reconnectStrategy;
 
@@ -72,14 +85,16 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
   @Activate
   public ConnectorioProxyService(@Reference DeviceAuthentication authentication, @Reference ConfigurationAdmin configurationAdmin) throws IOException {
     this.authentication = authentication;
-    Configuration configuration = configurationAdmin.getConfiguration("org.connectorio.cloud.service.proxy.co7io");
+    Configuration configuration = configurationAdmin.getConfiguration(SERVICE_PID);
     String serverHost = resolveOption(configuration, "host", Object::toString, () -> DEFAULT_HOST);
     secure = resolveOption(configuration, "secure", (v -> Boolean.parseBoolean(v.toString())), () -> Boolean.TRUE);
     port = resolveOption(configuration, "port", (v -> Integer.parseInt(v.toString())), () -> secure ? 443 : 80);
 
+    forwardHost = resolveOption(configuration, "forwardHost", Object::toString, () -> DEFAULT_FORWARD_HOST);
+    forwardPort = resolveOption(configuration, "forwardPort", (v -> Integer.parseInt(v.toString())), () -> DEFAULT_FORWARD_PORT);
+
     // hm.. can it become stale once device is re-authenticated to different organization?
     //String clientId = authentication.getOrganizationId() + "." + authentication.getDeviceId();
-
     host = authentication.getOrganizationId() + "-" + authentication.getDeviceId() + "." + serverHost;
 
     reconnectStrategy = new SimpleReconnectStrategy(this);
@@ -111,7 +126,7 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
 
     URI serverUri = URI.create((secure ? "wss://" : "ws://") + host + ":" + port + "/connect");
     logger.info("Launching WebSocket connection to {}", serverUri);
-    listener = new WebSocketListener(HttpClient.newBuilder().version(Version.HTTP_1_1).build(), reconnectStrategy);
+    listener = new WebSocketListener(forwardHost, forwardPort, HttpClient.newBuilder().version(Version.HTTP_1_1).build(), reconnectStrategy);
     webSocketBuilder.buildAsync(serverUri, listener)
       .whenComplete((response, error) -> {
         if (error != null) {

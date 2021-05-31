@@ -62,6 +62,14 @@
         <artifactId>karaf-maven-plugin</artifactId>
         <version>${karaf.version}</version>
         <extensions>true</extensions>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifestEntries>
+              <Karaf-Feature-Start>false</Karaf-Feature-Start>
+            </manifestEntries>
+          </archive>
+        </configuration>
         <executions>
           <execution>
             <id>default-features-generate-descriptor</id>

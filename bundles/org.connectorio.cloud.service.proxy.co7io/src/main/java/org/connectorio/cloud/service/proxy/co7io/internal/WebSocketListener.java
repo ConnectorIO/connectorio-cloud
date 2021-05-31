@@ -46,6 +46,9 @@ public class WebSocketListener implements Listener {
 
   private final Logger logger = LoggerFactory.getLogger(WebSocketListener.class);
   private final AtomicReference<ProxyConnectionState> state = new AtomicReference<>(ProxyConnectionState.DISCONNECTED);
+
+  private final String forwardHost;
+  private final int forwardPort;
   private final HttpClient httpClient;
   private final ConnectionStateListener listener;
 
@@ -55,7 +58,9 @@ public class WebSocketListener implements Listener {
   private ObjectMapper mapper = new ObjectMapper();
   private WebSocket webSocket;
 
-  public WebSocketListener(HttpClient httpClient, ConnectionStateListener listener) {
+  public WebSocketListener(String forwardHost, int forwardPort, HttpClient httpClient, ConnectionStateListener listener) {
+    this.forwardHost = forwardHost;
+    this.forwardPort = forwardPort;
     this.httpClient = httpClient;
     this.listener = listener;
   }
@@ -89,7 +94,7 @@ public class WebSocketListener implements Listener {
         if (bufferedData.length > 0) {
           Request jsonRequest = mapper.readerFor(Request.class).readValue(new GZIPInputStream(new ByteArrayInputStream(bufferedData)));
 
-          URI requestUri = URI.create("http://127.0.0.1:8181" + jsonRequest.getAddress());
+          URI requestUri = URI.create("http://" + forwardHost + ":" + forwardPort + jsonRequest.getAddress());
           HttpRequest.Builder builder = HttpRequest.newBuilder(requestUri)
               .method(jsonRequest.getMethod(), BodyPublishers.ofByteArray(jsonRequest.getPayload()));
 
@@ -182,6 +187,10 @@ public class WebSocketListener implements Listener {
   }
 
   public void send(TextEvent event) {
+    if (webSocket == null) {
+      logger.debug("Ignoring event {} broadcast, connection is not in place", event);
+      return;
+    }
     try {
       webSocket.sendText(mapper.writeValueAsString(event), true);
     } catch (JsonProcessingException e) {
