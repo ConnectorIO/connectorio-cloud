@@ -23,12 +23,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Builder;
-import java.util.Map;
+import java.time.DateTimeException;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.measure.Unit;
 import org.connectorio.cloud.device.auth.DeviceAuthentication;
 import org.connectorio.cloud.service.CloudService;
 import org.connectorio.cloud.service.CloudServiceState;
@@ -41,7 +43,20 @@ import org.connectorio.cloud.service.proxy.co7io.internal.reconnect.SimpleReconn
 import org.connectorio.cloud.service.standard.NamedCloudServiceType;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.types.util.UnitUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -77,14 +92,21 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
   private final String forwardHost;
   private final int forwardPort;
   private final DeviceAuthentication authentication;
+  private final BundleContext bundleContext;
+  private final ItemRegistry itemRegistry;
+  private final LocaleProvider localeProvider;
   private final ReconnectStrategy reconnectStrategy;
 
   private WebSocket connection;
   private WebSocketListener listener;
 
   @Activate
-  public ConnectorioProxyService(@Reference DeviceAuthentication authentication, @Reference ConfigurationAdmin configurationAdmin) throws IOException {
+  public ConnectorioProxyService(@Reference DeviceAuthentication authentication, @Reference ConfigurationAdmin configurationAdmin,
+    BundleContext bundleContext, @Reference ItemRegistry itemRegistry, @Reference LocaleProvider localeProvider) throws IOException {
     this.authentication = authentication;
+    this.bundleContext = bundleContext;
+    this.itemRegistry = itemRegistry;
+    this.localeProvider = localeProvider;
     Configuration configuration = configurationAdmin.getConfiguration(SERVICE_PID);
     String serverHost = resolveOption(configuration, "host", Object::toString, () -> DEFAULT_HOST);
     secure = resolveOption(configuration, "secure", (v -> Boolean.parseBoolean(v.toString())), () -> Boolean.TRUE);
@@ -134,7 +156,23 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
           return;
         }
         connection = response;
+        sendItemStates();
       });
+  }
+
+  private void sendItemStates() {
+    for (Item item : itemRegistry.getAll()) {
+      org.openhab.core.types.State state = item.getState();
+      if (UnDefType.NULL == state || UnDefType.UNDEF == state) {
+        continue;
+      }
+      try {
+        String displayState = getDisplayState(item, localeProvider.getLocale(), item.getState());
+        listener.send(new StatesEvent(item.getName(), new State("" + state, displayState)));
+      } catch (Exception e) {
+        logger.warn("Could not item {} initial state.", item.getName(), e);
+      }
+    }
   }
 
   private <T> T resolveOption(Configuration configuration, String key, Function<Object, T> mapping, Supplier<T> fallback) {
@@ -182,13 +220,89 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
   @Override
   public void receive(org.openhab.core.events.Event event) {
     if (listener != null) {
-      if (event instanceof ItemStateEvent) {
-        ItemStateEvent item = (ItemStateEvent) event;
-        listener.send(new StatesEvent(item.getItemName(), new State("" + item.getItemState(), "" + item.getItemState())));
+      if (event instanceof ItemStateChangedEvent) {
+        ItemStateChangedEvent item = (ItemStateChangedEvent) event;
+        try {
+          String displayState = getDisplayState(itemRegistry.getItem(item.getItemName()), localeProvider.getLocale(), item.getItemState());
+          listener.send(new StatesEvent(item.getItemName(), new State("" + item.getItemState(), displayState)));
+        } catch (ItemNotFoundException e) {
+          logger.warn("Received event for item called '{}' which is gone", item.getItemName(), e);
+        }
       } else {
         listener.send(new Event(event.getTopic(), event.getPayload(), event.getType()));
       }
     }
   }
 
+  private String getDisplayState(Item item, Locale locale, org.openhab.core.types.State state) {
+    StateDescription stateDescription = item.getStateDescription(locale);
+    String displayState = state.toString();
+
+    if (!(state instanceof UnDefType)) {
+      if (stateDescription != null) {
+        if (!stateDescription.getOptions().isEmpty()) {
+          // Look for a state option with a label corresponding to the state
+          for (StateOption option : stateDescription.getOptions()) {
+            if (option.getValue().equals(state.toString()) && option.getLabel() != null) {
+              displayState = option.getLabel();
+              break;
+            }
+          }
+        } else {
+          // If there's a pattern, first check if it's a transformation
+          String pattern = stateDescription.getPattern();
+          if (pattern != null) {
+            if (TransformationHelper.isTransform(pattern)) {
+              try {
+                displayState = TransformationHelper.transform(bundleContext, pattern, state.toString());
+              } catch (NoClassDefFoundError ex) {
+                // TransformationHelper is optional dependency, so ignore if class not found
+                // return state as it is without transformation
+              } catch (TransformationException e) {
+                logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}",
+                    state, item.getName(), pattern, e.getMessage());
+              }
+            } else {
+              // if it's not a transformation pattern, then it must be a format string
+
+              if (state instanceof QuantityType) {
+                QuantityType<?> quantityState = (QuantityType<?>) state;
+                // sanity convert current state to the item state description unit in case it was
+                // updated in the meantime. The item state is still in the "original" unit while the
+                // state description will display the new unit:
+                Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
+                if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
+                  quantityState = quantityState.toUnit(patternUnit);
+                }
+
+                if (quantityState != null) {
+                  state = quantityState;
+                }
+              } else if (state instanceof DateTimeType) {
+                // Translate a DateTimeType state to the local time zone
+                try {
+                  state = ((DateTimeType) state).toLocaleZone();
+                } catch (DateTimeException e) {
+                }
+              }
+
+              // The following exception handling has been added to work around a Java bug with formatting
+              // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
+              // This also handles IllegalFormatConversionException, which is a subclass of
+              // IllegalArgument.
+              try {
+                displayState = state.format(pattern);
+              } catch (IllegalArgumentException e) {
+                logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}",
+                  state, item.getName(), pattern, e);
+                displayState = state.toString();
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return displayState;
+  }
 }

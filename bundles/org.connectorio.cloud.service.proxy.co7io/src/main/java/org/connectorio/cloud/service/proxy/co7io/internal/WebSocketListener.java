@@ -94,7 +94,7 @@ public class WebSocketListener implements Listener {
         if (bufferedData.length > 0) {
           Request jsonRequest = mapper.readerFor(Request.class).readValue(new GZIPInputStream(new ByteArrayInputStream(bufferedData)));
 
-          URI requestUri = URI.create("http://" + forwardHost + ":" + forwardPort + jsonRequest.getAddress());
+          URI requestUri = URI.create("http://" + forwardHost + ":" + forwardPort + jsonRequest.getAddress().replace("#", "%23"));
           HttpRequest.Builder builder = HttpRequest.newBuilder(requestUri)
               .method(jsonRequest.getMethod(), BodyPublishers.ofByteArray(jsonRequest.getPayload()));
 

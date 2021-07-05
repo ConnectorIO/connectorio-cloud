@@ -187,6 +187,11 @@
 
       <dependency>
         <groupId>org.openhab.core.bundles</groupId>
+        <artifactId>org.openhab.core</artifactId>
+        <version>${openhab.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openhab.core.bundles</groupId>
         <artifactId>org.openhab.core.id</artifactId>
         <version>${openhab.version}</version>
       </dependency>
@@ -198,6 +203,11 @@
       <dependency>
         <groupId>org.openhab.core.bundles</groupId>
         <artifactId>org.openhab.core.io.transport.mqtt</artifactId>
+        <version>${openhab.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openhab.core.bundles</groupId>
+        <artifactId>org.openhab.core.transform</artifactId>
         <version>${openhab.version}</version>
       </dependency>
 
