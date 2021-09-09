@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
     "service.config.category=ConnectorIO Cloud",
     "service.config.description.uri=connectorio:proxy",
   })
-public class ConnectorioProxyService implements CloudProxyConnection, EventSubscriber {
+public class ConnectorioProxyService implements CloudProxyConnection, EventSubscriber, ConnectionStateListener {
 
   public static final String SERVICE_PID = "org.connectorio.cloud.service.proxy.co7io";
 
@@ -148,7 +148,8 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
 
     URI serverUri = URI.create((secure ? "wss://" : "ws://") + host + ":" + port + "/connect");
     logger.info("Launching WebSocket connection to {}", serverUri);
-    listener = new WebSocketListener(forwardHost, forwardPort, HttpClient.newBuilder().version(Version.HTTP_1_1).build(), reconnectStrategy);
+    ConnectionStateListener connectionListener = new CompositeConnectionStateListener(reconnectStrategy, this);
+    listener = new WebSocketListener(forwardHost, forwardPort, HttpClient.newBuilder().version(Version.HTTP_1_1).build(), connectionListener);
     webSocketBuilder.buildAsync(serverUri, listener)
       .whenComplete((response, error) -> {
         if (error != null) {
@@ -156,7 +157,6 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
           return;
         }
         connection = response;
-        sendItemStates();
       });
   }
 
@@ -305,4 +305,14 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
 
     return displayState;
   }
+
+  @Override
+  public void connected(WebSocket webSocket) {
+    sendItemStates();
+  }
+
+  @Override
+  public void disconnected(WebSocket webSocket) {
+  }
+
 }
