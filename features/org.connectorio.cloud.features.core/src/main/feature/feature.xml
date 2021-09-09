@@ -23,17 +23,11 @@
     http://karaf.apache.org/xmlns/features/v1.3.0
   ">
 
-  <!--
-  The "matt-client-api" is not defined here as it is appended in platform specific feature sets!
-  -->
-
   <feature name="connectorio-cloud" version="${project.version}" description="Connectivity via ConnectorIO Cloud">
     <feature>connectorio-device-auth-nimbus</feature>
     <feature>connectorio-device-auth-setup</feature>
     <feature>connectorio-device-auth-ui</feature>
-    <!--
     <feature>connectorio-event-item</feature>
-    -->
   </feature>
 
   <!-- Provided features -->
@@ -41,14 +35,12 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service/${project.version}</bundle>
   </feature>
 
-  <!--
   <feature name="connectorio-service-mqtt" version="${project.version}" description="Cloud Service MQTT API">
-    <feature>mqtt-client-api</feature>
+    <feature>openhab-core-io-transport-mqtt</feature>
     <feature>connectorio-service</feature>
     <feature>connectorio-device-auth</feature>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt/${project.version}</bundle>
   </feature>
-  -->
 
   <feature name="connectorio-service-proxy" version="${project.version}" description="Cloud Proxy Service API">
     <feature>connectorio-service</feature>
@@ -56,7 +48,6 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.proxy/${project.version}</bundle>
   </feature>
 
-  <!--
   <feature name="connectorio-event-mapping" version="${project.version}" description="Event Mapping">
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.mapping/${project.version}</bundle>
   </feature>
@@ -66,7 +57,6 @@
     <feature>connectorio-event-mapping</feature>
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.event.item/${project.version}</bundle>
   </feature>
-  -->
 
   <feature name="connectorio-device-auth" version="${project.version}" description="Device Authentication API">
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.device.auth/${project.version}</bundle>
