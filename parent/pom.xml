@@ -297,6 +297,81 @@
           <artifactId>maven-install-plugin</artifactId>
           <version>3.0.0-M1</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <inherited>true</inherited>
+          <executions>
+            <execution>
+              <id>attach-feature-xml</id>
+              <goals>
+                <goal>attach-artifact</goal>
+              </goals>
+              <configuration>
+                <artifacts>
+                  <artifact>
+                    <file>${feature.file}</file>
+                    <classifier>features</classifier>
+                    <type>xml</type>
+                  </artifact>
+                </artifacts>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.karaf.tooling</groupId>
+          <artifactId>karaf-maven-plugin</artifactId>
+          <version>${karaf.version}</version>
+          <extensions>true</extensions>
+          <inherited>true</inherited>
+          <configuration>
+            <startLevel>80</startLevel>
+            <enableGeneration>true</enableGeneration>
+            <aggregateFeatures>false</aggregateFeatures>
+            <checkDependencyChange>false</checkDependencyChange>
+            <failOnDependencyChange>false</failOnDependencyChange>
+            <logDependencyChanges>false</logDependencyChanges>
+            <overwriteChangedDependencies>false</overwriteChangedDependencies>
+          </configuration>
+          <executions>
+            <execution>
+              <id>karaf-kar</id>
+              <goals>
+                <goal>kar</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+            <execution>
+              <id>karaf-verification</id>
+              <goals>
+                <goal>verify</goal>
+              </goals>
+              <phase>verify</phase>
+              <configuration>
+                <descriptors combine.children="append">
+                  <!-- Apache Karaf -->
+                  <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                  <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                  <!-- Current feature under verification -->
+                  <descriptor>file:${feature.file}</descriptor>
+                </descriptors>
+                <!-- wait till KARAF-7316 to swap it -->
+                <distribution>org.apache.karaf.features:framework</distribution>
+                <javase>11</javase>
+                <framework>
+                  <feature>framework</feature>
+                </framework>
+                <features combine.children="override">
+                  <feature>_none_</feature>
+                </features>
+                <verifyTransitive>false</verifyTransitive>
+                <ignoreMissingConditions>true</ignoreMissingConditions>
+                <fail>first</fail>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>

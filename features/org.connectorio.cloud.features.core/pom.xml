@@ -27,7 +27,7 @@
   </parent>
 
   <artifactId>org.connectorio.cloud.features.core</artifactId>
-  <packaging>kar</packaging>
+  <packaging>pom</packaging>
 
   <name>ConnectorIO Cloud | Features | Core</name>
   <description>Distribution features.</description>
@@ -87,7 +87,7 @@
       <artifactId>commons-codec</artifactId>
     </dependency>
 
-    <!-- Framework distribution -->
+    <!-- remove after KARAF-7316 is fixed -->
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>framework</artifactId>
@@ -97,50 +97,39 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/feature</directory>
+        <filtering>true</filtering>
+        <targetPath>${project.build.directory}/feature</targetPath>
+      </resource>
+    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>karaf-maven-plugin</artifactId>
-        <version>${karaf.version}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifestEntries>
-              <Karaf-Feature-Start>false</Karaf-Feature-Start>
-            </manifestEntries>
-          </archive>
-        </configuration>
         <executions>
           <execution>
-            <id>default-features-generate-descriptor</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>features-generate-descriptor</goal>
-            </goals>
-            <configuration>
-              <primaryFeatureName>connectorio-cloud-core</primaryFeatureName>
-              <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
-            </configuration>
-          </execution>
-          <execution>
-            <id>verify</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>verify</goal>
-            </goals>
+            <id>karaf-verification</id>
             <configuration>
               <descriptors>
-                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
-                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
-                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                 <repository>mvn:org.openhab.core.features.karaf/org.openhab.core.features.karaf.openhab-core/${openhab.version}/xml/features</repository>
               </descriptors>
-              <distribution>org.apache.karaf.features:framework</distribution>
-              <javase>11</javase>
-              <framework>
-                <feature>framework</feature>
-              </framework>
               <features>
                 <feature>connectorio-*</feature>
               </features>
