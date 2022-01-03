@@ -132,9 +132,9 @@
     <feature>mail-api</feature>
     <feature>http</feature>
 
-    <bundle>wrap:mvn:net.minidev/accessors-smart/1.2$overwrite=merge&amp;Import-Package=*</bundle>
-    <bundle>mvn:net.minidev/json-smart/2.3</bundle>
-    <bundle>mvn:com.nimbusds/lang-tag/1.4.4</bundle>
+    <bundle>wrap:mvn:net.minidev/accessors-smart/2.4.7$overwrite=merge&amp;Import-Package=*</bundle>
+    <bundle>mvn:net.minidev/json-smart/2.4.7</bundle>
+    <bundle>mvn:com.nimbusds/lang-tag/1.5</bundle>
     <bundle>mvn:com.nimbusds/content-type/2.1</bundle>
     <bundle>mvn:com.nimbusds/nimbus-jose-jwt/${nimbusds-jose-jwt.version}</bundle>
     <bundle>mvn:com.nimbusds/oauth2-oidc-sdk/${nimbusds-oidc-sdk.version}</bundle>

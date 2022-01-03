@@ -41,14 +41,16 @@
     <openhab.version>3.0.2</openhab.version>
     <karaf.version>4.2.8</karaf.version>
 
-    <nimbusds-jose-jwt.version>8.20.1</nimbusds-jose-jwt.version>
-    <nimbusds-oidc-sdk.version>8.23.1</nimbusds-oidc-sdk.version>
+    <nimbusds-jose-jwt.version>9.15.2</nimbusds-jose-jwt.version>
+    <nimbusds-oidc-sdk.version>9.19</nimbusds-oidc-sdk.version>
 
     <zxing.version>3.4.1</zxing.version>
 
     <maven-bundle-plugin.version>4.2.0</maven-bundle-plugin.version>
     <osgi.version>7.0.0</osgi.version>
     <ds-annotations.version>1.4.0</ds-annotations.version>
+
+    <feature.file>${project.build.directory}/feature/feature.xml</feature.file>
   </properties>
 
   <dependencyManagement>
