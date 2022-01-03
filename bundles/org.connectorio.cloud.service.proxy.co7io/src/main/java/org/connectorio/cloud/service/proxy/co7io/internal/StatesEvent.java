@@ -25,4 +25,8 @@ public class StatesEvent extends HashMap<String, Object> implements TextEvent {
     put(item, state);
   }
 
+  public String toString() {
+    return "StatesEvent " + super.toString();
+  }
+
 }

@@ -164,10 +164,12 @@ public class ConnectorioProxyService implements CloudProxyConnection, EventSubsc
     for (Item item : itemRegistry.getAll()) {
       org.openhab.core.types.State state = item.getState();
       if (UnDefType.NULL == state || UnDefType.UNDEF == state) {
+        logger.trace("Ignore item {} state, not relevant {}", item.getName(), state);
         continue;
       }
       try {
         String displayState = getDisplayState(item, localeProvider.getLocale(), item.getState());
+        logger.trace("Send item {} state {}", item.getName(), state);
         listener.send(new StatesEvent(item.getName(), new State("" + state, displayState)));
       } catch (Exception e) {
         logger.warn("Could not item {} initial state.", item.getName(), e);

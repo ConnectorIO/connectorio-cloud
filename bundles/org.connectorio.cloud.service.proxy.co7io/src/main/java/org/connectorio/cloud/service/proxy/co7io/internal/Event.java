@@ -29,4 +29,8 @@ class Event implements TextEvent {
     this.type = type;
   }
 
+  public String toString() {
+    return "Event [" + topic + " payload: " + payload + ", type: " + type + "]";
+  }
+
 }
