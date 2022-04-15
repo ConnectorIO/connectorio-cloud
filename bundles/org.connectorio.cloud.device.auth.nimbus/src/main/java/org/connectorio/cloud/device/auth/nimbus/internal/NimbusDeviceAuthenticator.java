@@ -109,6 +109,7 @@ public class NimbusDeviceAuthenticator implements DeviceAuthenticator {
         .forEach(provider -> append(builder, provider));
 
       HTTPRequest httpRequest = builder.build().toHTTPRequest();
+      logger.debug("Prepared device code request: {}. Additional parameters: {}", httpRequest.getURI(), httpRequest.getQueryParameters());
       // append device certificate if any
       appendCertificate(httpRequest);
 
