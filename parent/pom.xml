@@ -38,7 +38,7 @@
     <compiler.target>11</compiler.target>
 
     <slf4j.version>1.7.12</slf4j.version>
-    <openhab.version>3.0.2</openhab.version>
+    <openhab.version>3.0.4-connectorio-1</openhab.version>
     <karaf.version>4.2.8</karaf.version>
 
     <nimbusds-jose-jwt.version>9.15.2</nimbusds-jose-jwt.version>
