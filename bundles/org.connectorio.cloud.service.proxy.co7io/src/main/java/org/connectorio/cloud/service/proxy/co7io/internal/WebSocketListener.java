@@ -34,8 +34,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.connectorio.cloud.service.proxy.ProxyConnectionState;
@@ -51,6 +60,8 @@ public class WebSocketListener implements Listener {
   private final int forwardPort;
   private final HttpClient httpClient;
   private final ConnectionStateListener listener;
+  // control access to websocket to avoid race conditions
+  private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "websocket-reply-thread"));
 
   private ByteArrayOutputStream requestStream = new ByteArrayOutputStream(512);
   private ByteArrayOutputStream responseStream = new ByteArrayOutputStream(1024);
@@ -77,12 +88,13 @@ public class WebSocketListener implements Listener {
   @Override
   public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
     logger.debug("Received text data {}, last {}", data, last);
-    return Listener.super.onText(webSocket, data, last);
+    return dispatch(ws -> Listener.super.onText(ws, data, last));
   }
 
   @Override
   public CompletionStage<?> onBinary(WebSocket webSocket, ByteBuffer data, boolean last) {
-    logger.debug("Received binary data {}, last {}", data, last);
+    final AtomicReference<UUID> id = new AtomicReference<>(UUID.randomUUID());
+    logger.debug("[{}] Received binary data {}, last {}", id, data, last);
     boolean complete = false;
     try {
       byte[] buffer = new byte[data.capacity() - data.position()];
@@ -93,6 +105,8 @@ public class WebSocketListener implements Listener {
         byte[] bufferedData = requestStream.toByteArray();
         if (bufferedData.length > 0) {
           Request jsonRequest = mapper.readerFor(Request.class).readValue(new GZIPInputStream(new ByteArrayInputStream(bufferedData)));
+          logger.debug("[{}] Changing request id to server context {}", id.get(), jsonRequest.getId());
+          id.set(jsonRequest.getId());
 
           URI requestUri = URI.create("http://" + forwardHost + ":" + forwardPort + jsonRequest.getAddress().replace("#", "%23"));
           HttpRequest.Builder builder = HttpRequest.newBuilder(requestUri)
@@ -106,8 +120,7 @@ public class WebSocketListener implements Listener {
             builder.header(entry.getKey(), entry.getValue());
           }
 
-          logger.debug("Received request {}", requestUri);
-
+          logger.debug("[{}] Dispatching request to client {}", id.get(), requestUri);
           httpClient.sendAsync(builder.build(), BodyHandlers.ofByteArray()).whenComplete((response, error) -> {
             Map<String, String> responseHeaders = new LinkedHashMap<>();
             Response jsonResponse = new Response();
@@ -127,42 +140,52 @@ public class WebSocketListener implements Listener {
               gzipOutputStream.finish();
 
               if (logger.isTraceEnabled()) {
-                logger.trace("Sending response {}", responseStream.toString());
+                logger.trace("[{}] Sending response {}", id.get(), responseStream.toString());
               } else if (logger.isDebugEnabled()) {
-                logger.debug("Sending response {}", response.statusCode());
+                logger.debug("[{}] Sending response {}", id.get(), response.statusCode());
               }
 
-              webSocket.sendBinary(ByteBuffer.wrap(output.toByteArray()), true);
+              dispatch(ws -> ws.sendBinary(ByteBuffer.wrap(output.toByteArray()), true).whenComplete((r, e) -> {
+                responseStream = new ByteArrayOutputStream(1024);
+                if (e != null) {
+                  logger.error("[{}] Error while publishing http response to websocket connection", id.get(), e);
+                } else {
+                  logger.debug("[{}] Http response pushed over websocket connection", id.get());
+                }
+              }));
             } catch (IOException e) {
-              e.printStackTrace();
+              logger.error("[{}] Error while handling request", id.get(), e);
             }
+          }).whenComplete((r, e) -> {
+            if (e != null) {
+              logger.error("[{}] Finished http call with status {}", id.get(), r.statusCode(), e);
+              return;
+            }
+            logger.debug("[{}] Finished http call with status {}", id.get(), r.statusCode());
           });
         }
       }
     } catch (IOException e) {
-      logger.error("Could not handle Websocket payload", e);
+      logger.error("[{}] Could not handle Websocket payload", id.get(), e);
     } finally {
       if (last) {
-        // reset buffer
+        // reset buffers
         requestStream = new ByteArrayOutputStream(512);
-        if (complete) {
-          responseStream = new ByteArrayOutputStream(1024);
-        }
       }
     }
-    return Listener.super.onBinary(webSocket, data, last);
+    return dispatch(ws -> Listener.super.onBinary(ws, data, last));
   }
 
   @Override
   public CompletionStage<?> onPing(WebSocket webSocket, ByteBuffer message) {
     logger.debug("{} ping", webSocket);
-    return Listener.super.onPing(webSocket, message);
+    return dispatch(ws -> Listener.super.onPing(ws, message));
   }
 
   @Override
   public CompletionStage<?> onPong(WebSocket webSocket, ByteBuffer message) {
     logger.debug("{} pong", webSocket);
-    return Listener.super.onPong(webSocket, message);
+    return dispatch(ws -> Listener.super.onPong(ws, message));
   }
 
   @Override
@@ -178,12 +201,12 @@ public class WebSocketListener implements Listener {
     logger.warn("Error while handling Websocket conversation", error);
     if (error instanceof IOException) {
       if (!webSocket.isOutputClosed()) {
-        webSocket.sendClose(1000, "Generic IO Error");
+        dispatch(ws -> ws.sendClose(1000, "Generic IO Error"));
       } else {
         setState(ProxyConnectionState.DISCONNECTED);
       }
     }
-    Listener.super.onError(webSocket, error);
+    call(ws -> Listener.super.onError(ws, error));
   }
 
   public void send(TextEvent event) {
@@ -191,11 +214,21 @@ public class WebSocketListener implements Listener {
       logger.debug("Ignoring event {} broadcast, connection is not in place", event);
       return;
     }
-    try {
-      webSocket.sendText(mapper.writeValueAsString(event), true);
-    } catch (JsonProcessingException e) {
-      logger.warn("Failed to send state update", e);
-    }
+    call(ws -> {
+      try {
+       ws.sendText(mapper.writeValueAsString(event), true);
+      } catch (JsonProcessingException e) {
+        logger.warn("Failed to send state update", e);
+      }
+    });
+  }
+
+  private <X> CompletableFuture<X> dispatch(Function<WebSocket, X> call) {
+    return CompletableFuture.supplyAsync(() -> call.apply(webSocket), executor);
+  }
+
+  private CompletableFuture<Void> call(Consumer<WebSocket> consumer) {
+    return CompletableFuture.runAsync(() -> consumer.accept(webSocket), executor);
   }
 
   private void setState(ProxyConnectionState state) {
