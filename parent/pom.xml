@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.connectorio.cloud</groupId>
     <artifactId>connectorio-cloud</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -279,7 +279,7 @@
           <version>${maven-bundle-plugin.version}</version>
           <configuration>
             <instructions>
-              <_nouses></_nouses>
+              <_nouses />
               <_consumer-policy>0</_consumer-policy>
               <_dsannotations>*</_dsannotations>
               <_dsannotations-options>version;minimum=1.4</_dsannotations-options>
