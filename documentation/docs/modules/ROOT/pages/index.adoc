@@ -1,0 +1,18 @@
+= ConnectorIO Cloud extensions
+
+This repository ships several important components required for cloud scale deployment of openHAB.
+
+It does bring device authentication API which rely on OAuth Device Flow and not copy-pasted configs.
+With such mechanism it is possible to have "effortless" pairing experience which does not bother user.
+This also means that authorization server who ship device token can confirm device identity (identifiers).
+Major advantage of OAuth Device Flow is explicit support for multiple device instances.
+
+Device authentication have been tested with openHAB-compatible deployments.
+Separation of modules is made in such a way that it is possible to run it on pure OSGi and not only openHAB.
+
+Next two bits which are shipped are related to device identifiers and mqtt connectivity.
+Given that MQTT is a handy way to transmit telemetry data this repository also ships basic MQTT integration.
+The MQTT service depends upon successful device authentication and use authorization information returned by server JWT (`organization` + `device` claims).
+
+Last portion are feature sets which can be run with openHAB as well as any other system (including custom forks of earlier one).
+
