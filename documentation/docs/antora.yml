@@ -1,4 +1,4 @@
-name: add-ons
+name: cloud-extensions
 title: Connectorio Cloud Extensions
-start_page: ROOT:index.adoc
+start_page: ROOT:cloud-extensions.adoc
 version: 0.1
