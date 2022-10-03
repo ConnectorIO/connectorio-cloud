@@ -80,6 +80,10 @@
       <groupId>org.connectorio.cloud</groupId>
       <artifactId>org.connectorio.cloud.service.mqtt.co7io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.connectorio.cloud</groupId>
+      <artifactId>org.connectorio.cloud.service.mqtt.aws</artifactId>
+    </dependency>
 
     <dependency>
       <!-- force inclusion in KAR -->

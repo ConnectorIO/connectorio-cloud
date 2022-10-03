@@ -45,12 +45,16 @@
     <nimbusds-oidc-sdk.version>9.19</nimbusds-oidc-sdk.version>
 
     <zxing.version>3.4.1</zxing.version>
+    <units-api.version>1.0</units-api.version>
 
     <maven-bundle-plugin.version>4.2.0</maven-bundle-plugin.version>
     <osgi.version>7.0.0</osgi.version>
     <ds-annotations.version>1.4.0</ds-annotations.version>
 
     <feature.file>${project.build.directory}/feature/feature.xml</feature.file>
+    <jackson.version>2.13.3</jackson.version>
+    <netty.version>4.1.42.Final</netty.version>
+    <bouncycastle.version>1.52</bouncycastle.version>
   </properties>
 
   <dependencyManagement>
@@ -100,6 +104,11 @@
       <dependency>
         <groupId>org.connectorio.cloud</groupId>
         <artifactId>org.connectorio.cloud.service.mqtt.co7io</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.connectorio.cloud</groupId>
+        <artifactId>org.connectorio.cloud.service.mqtt.aws</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

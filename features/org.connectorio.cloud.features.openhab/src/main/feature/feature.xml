@@ -41,6 +41,15 @@
     <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt.co7io/${project.version}</bundle>
   </feature>
 
+  <feature name="connectorio-service-mqtt-aws" version="${project.version}" description="MQTT / AWS Bridge Bootstrap">
+    <feature>connectorio-service-mqtt</feature>
+    <feature>openhab.tp-jackson</feature>
+
+    <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
+    <bundle>mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
+    <bundle>mvn:org.connectorio.cloud/org.connectorio.cloud.service.mqtt.aws/${project.version}</bundle>
+  </feature>
+
   <feature name="connectorio-service-proxy-co7io" version="${project.version}" description="Proxy service" hidden="true">
     <feature>openhab.tp-jackson</feature>
     <feature>openhab-core-base</feature>
