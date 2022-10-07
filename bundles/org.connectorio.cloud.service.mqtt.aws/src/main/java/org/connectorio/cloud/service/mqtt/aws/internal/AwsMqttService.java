@@ -24,12 +24,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.net.ssl.TrustManager;
-import org.connectorio.cloud.device.auth.DeviceAuthentication;
 import org.connectorio.cloud.service.CloudService;
 import org.connectorio.cloud.service.CloudServiceState;
 import org.connectorio.cloud.service.CloudServiceStates;
 import org.connectorio.cloud.service.CloudServiceType;
-import org.connectorio.cloud.service.mqtt.CloudMqttConnection;
 import org.connectorio.cloud.service.mqtt.MqttConnectionState;
 import org.connectorio.cloud.service.mqtt.aws.internal.client.ClientCertificateMqttClientWrapper;
 import org.connectorio.cloud.service.mqtt.aws.internal.client.ssl.StringKeyManagerFactory;
@@ -74,6 +72,14 @@ public class AwsMqttService implements CloudService, AwsPublisher, MqttConnectio
   private final String clientId;
   private final ExtensibleTrustManager trustManager;
   private final String topic;
+  private final int qos;
+  private final boolean retain;
+
+  // payload settings
+  private final String dynamicTopic;
+  private final boolean attachTags;
+  private final boolean attachTimestamp;
+  private final boolean stateChange;
 
   @Override
   public CloudServiceType getServiceType() {
@@ -104,7 +110,17 @@ public class AwsMqttService implements CloudService, AwsPublisher, MqttConnectio
     clientId = resolveOption(configuration, "clientId", (Object::toString), () -> "sdk/java");
     certificateFile = resolveOption(configuration, "certificateFile", (v -> new File("" + v)), () -> null);
     privateKeyFile = resolveOption(configuration, "privateKeyFile", (v -> new File("" + v)), () -> null);
+    // topic
     topic = resolveOption(configuration, "topic", (Object::toString), () -> "sdk/test/java");
+    dynamicTopic = resolveOption(configuration, "dynamicTopic", (Object::toString), () -> "");
+    qos = resolveOption(configuration, "qos", (v -> Integer.parseInt(v.toString())), () -> 0);
+    retain = resolveOption(configuration, "retain", (v -> Boolean.parseBoolean(v.toString())), () -> false);
+    // payload
+    attachTags = resolveOption(configuration, "attachTags", (v -> Boolean.parseBoolean(v.toString())), () -> true);
+    attachTimestamp = resolveOption(configuration, "attachTimestamp", (v -> Boolean.parseBoolean(v.toString())), () -> true);
+    stateChange = resolveOption(configuration, "stateChange", (v -> Boolean.parseBoolean(v.toString())), () -> false);
+
+    // security
     this.trustManager = trustManager;
 
     if (host == null) {
@@ -169,12 +185,16 @@ public class AwsMqttService implements CloudService, AwsPublisher, MqttConnectio
   }
 
   @Override
-  public void publish(String message) {
+  public void publish(String item, String messageStr) {
     if (getClient().connectionState() == org.openhab.core.io.transport.mqtt.MqttConnectionState.CONNECTED) {
-      getClient().publish(topic, message.getBytes(), 0, false);
+      getClient().publish(determineTopic(item), messageStr.getBytes(), qos, retain);
     } else {
-      logger.debug("Could not publish message {}, connection is not in place", message);
+      logger.debug("Could not publish message {}, connection is not in place", item);
     }
+  }
+
+  private String determineTopic(String item) {
+    return topic + (dynamicTopic.replaceAll("\\$item", item));
   }
 
   @Override
@@ -182,5 +202,25 @@ public class AwsMqttService implements CloudService, AwsPublisher, MqttConnectio
     if (error != null) {
       logger.info("Disconnected from AWS broker due to error", error);
     }
+  }
+
+  @Override
+  public boolean isDynamicTopic() {
+    return dynamicTopic.contains("$item");
+  }
+
+  @Override
+  public boolean isStateChange() {
+    return stateChange;
+  }
+
+  @Override
+  public boolean isAttachTimestamp() {
+    return attachTimestamp;
+  }
+
+  @Override
+  public boolean isAttachTags() {
+    return attachTags;
   }
 }

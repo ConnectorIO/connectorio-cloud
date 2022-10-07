@@ -27,6 +27,14 @@
       <label>Authentication</label>
       <description>Security related settings which allow authenticating device with AWS infrastructure.</description>
     </parameter-group>
+    <parameter-group name="topic">
+      <label>Topic</label>
+      <description>Topic mapping.</description>
+    </parameter-group>
+    <parameter-group name="payload">
+      <label>Payload settings</label>
+      <description>Security related settings which allow authenticating device with AWS infrastructure.</description>
+    </parameter-group>
 
     <parameter name="host" type="text" required="true">
       <label>AWS IoT hostname</label>
@@ -43,12 +51,6 @@
       <description>MQTT client identifier, must be unique across whole deployment.</description>
       <default>sdk-java</default>
     </parameter>
-    <parameter name="topic" type="text" required="true">
-      <label>Topic</label>
-      <description>Topic on which device should publish its data.</description>
-      <default>sdk/test/java</default>
-    </parameter>
-
     <parameter name="certificateFile" type="text" required="true" groupName="authentication">
       <label>Device certificate</label>
       <description>Location of client certificate.</description>
@@ -56,6 +58,49 @@
     <parameter name="privateKeyFile" type="text" required="true" groupName="authentication">
       <label>Device private key</label>
       <description>Location of private key used for encryption.</description>
+    </parameter>
+
+    <parameter name="topic" type="text" required="true" groupName="topic">
+      <label>Topic</label>
+      <description>Topic on which device should publish its data.</description>
+      <default>sdk/test/java</default>
+    </parameter>
+    <parameter name="dynamicTopic" type="text" required="false" groupName="topic">
+      <label>Dynamic topic</label>
+      <description>Allows to specify topic name appended after topic name. Supported variable is $item.</description>
+      <default></default>
+    </parameter>
+    <parameter name="qos" type="integer" required="false" groupName="topic">
+      <label>Quality of Service (QoS)</label>
+      <description>Guarantee of delivery specified by client.</description>
+      <options>
+        <option value="0">At most once - message loss permitted</option>
+        <option value="1">At least once - duplicate messages allowed</option>
+      </options>
+      <default>0</default>
+    </parameter>
+    <parameter name="retain" type="boolean" required="false" groupName="topic">
+      <label>Retain</label>
+      <description>Specify retain option for published messages.</description>
+      <default>false</default>
+    </parameter>
+
+    <parameter name="attachTags" type="boolean" required="false" groupName="payload">
+      <label>Attach tags</label>
+      <description>Force inclusion of item tags for each update.</description>
+      <default>true</default>
+    </parameter>
+    <parameter name="attachTimestamp" type="boolean" required="false" groupName="payload">
+      <label>Attach timestamp</label>
+      <description>Include timestamp in sent event.</description>
+      <default>true</default>
+    </parameter>
+    <parameter name="stateChange" type="boolean" required="false" groupName="payload">
+      <label>State change</label>
+      <description>Determine if MQTT message should be sent for state update or for state changes.
+        By default, all updates are streamed to cloud.
+      </description>
+      <default>false</default>
     </parameter>
 
   </config-description>

@@ -18,25 +18,24 @@
 package org.connectorio.cloud.service.mqtt.aws.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.DateTimeException;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import javax.measure.Unit;
+import org.connectorio.cloud.service.mqtt.aws.internal.EventObject.StateObject;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
@@ -82,44 +81,54 @@ public class MqttItemStateEventListener implements EventSubscriber {
   @Override
   public void receive(org.openhab.core.events.Event event) {
     if (publisher != null) {
-      if (event instanceof ItemStateChangedEvent) {
-        ItemStateChangedEvent item = (ItemStateChangedEvent) event;
-        try {
-          String displayState = getDisplayState(itemRegistry.getItem(item.getItemName()), localeProvider.getLocale(), item.getItemState());
+      if (event instanceof ItemStateChangedEvent && publisher.isStateChange()) {
+        ItemStateChangedEvent itemStateChangedEvent = (ItemStateChangedEvent) event;
+        EventObject eventObject = prepareEventObject(itemStateChangedEvent.getItemName());
+        eventObject.setState(formatState(itemStateChangedEvent.getItemName(), itemStateChangedEvent.getItemState()));
+        publish(itemStateChangedEvent.getItemName(), eventObject);
+      }
 
-          Map<String, Object> stateMap = new LinkedHashMap<>();
-          stateMap.put("timestamp", System.currentTimeMillis());
-          stateMap.put("item", item.getItemName());
-          stateMap.put("state", "" + item.getItemState());
-          stateMap.put("displayState", displayState);
-
-          Map<String, Object> message = new LinkedHashMap<>();
-          message.put("type", "state");
-          message.put("state", stateMap);
-
-          publish(message);
-        } catch (ItemNotFoundException e) {
-          logger.warn("Received event for item called '{}' which is gone", item.getItemName(), e);
-        }
-      } else {
-        Map<String, Object> eventMap = new LinkedHashMap<>();
-        eventMap.put("timestamp", System.currentTimeMillis());
-        eventMap.put("topic", event.getTopic());
-
-        try {
-          Map<String, Object> payload = mapper.readValue(event.getPayload(), new TypeReference<>() {});
-          eventMap.put("payload", payload);
-        } catch (JsonProcessingException e) {
-          logger.warn("Field to deserialize event payload", e);
-        }
-
-        Map<String, Object> message = new LinkedHashMap<>();
-        message.put("type", event.getType());
-        message.put("event", eventMap);
-
-        publish(message);
+      if (event instanceof ItemStateEvent && !publisher.isStateChange()) {
+        ItemStateEvent itemStateEvent = (ItemStateEvent) event;
+        EventObject eventObject = prepareEventObject(itemStateEvent.getItemName());
+        eventObject.setState(formatState(itemStateEvent.getItemName(), itemStateEvent.getItemState()));
+        publish(itemStateEvent.getItemName(), eventObject);
       }
     }
+  }
+
+  private EventObject prepareEventObject(String item) {
+    EventObject eventObject = new EventObject();
+    if (publisher.isAttachTimestamp()) {
+      eventObject.setTimestamp(System.currentTimeMillis());
+    }
+    if (publisher.isAttachTags()) {
+      eventObject.setTags(collectTags(item));
+    }
+    if (!publisher.isDynamicTopic()) {
+      eventObject.setName(item);
+    }
+    return eventObject;
+  }
+
+  private StateObject formatState(String itemName, State itemState) {
+    StateObject stateObject = new StateObject();
+    stateObject.setReceived("" + itemState);
+    stateObject.setReceiveType(itemState.getClass().getSimpleName());
+    Item item = itemRegistry.get(itemName);
+    if (item != null) {
+      stateObject.setFormatted(getDisplayState(item, localeProvider.getLocale(), itemState));
+    }
+    return stateObject;
+  }
+
+  private String[] collectTags(String itemName) {
+    Item item = itemRegistry.get(itemName);
+    if (item == null) {
+      return new String[0];
+    }
+    Set<String> tags = item.getTags();
+    return tags.toArray(new String[tags.size()]);
   }
 
   private String getDisplayState(Item item, Locale locale, org.openhab.core.types.State state) {
@@ -194,10 +203,10 @@ public class MqttItemStateEventListener implements EventSubscriber {
     return displayState;
   }
 
-  private void publish(Map<String, Object> message) {
+  private void publish(String name, EventObject message) {
     try {
       String messageStr = mapper.writeValueAsString(message);
-      publisher.publish(messageStr);
+      publisher.publish(name, messageStr);
     } catch (JsonProcessingException e) {
       logger.warn("Failed to serialize event message", e);
     }

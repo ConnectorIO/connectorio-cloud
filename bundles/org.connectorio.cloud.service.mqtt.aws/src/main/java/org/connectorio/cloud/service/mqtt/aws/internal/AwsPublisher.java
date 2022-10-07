@@ -19,5 +19,14 @@ package org.connectorio.cloud.service.mqtt.aws.internal;
 
 public interface AwsPublisher {
 
-  void publish(String message);
+  void publish(String item, String messageStr);
+
+  // configuration
+  boolean isDynamicTopic();
+
+  boolean isStateChange();
+
+  boolean isAttachTimestamp();
+
+  boolean isAttachTags();
 }
