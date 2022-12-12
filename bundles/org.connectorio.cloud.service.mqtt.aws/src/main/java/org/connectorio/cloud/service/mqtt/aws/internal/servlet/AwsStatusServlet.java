@@ -29,6 +29,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
@@ -37,14 +39,12 @@ public class AwsStatusServlet extends HttpServlet {
 
   public static final String AWS_SVC_FILTER = "(" + Constants.SERVICE_PID + "=" + AwsMqttService.SERVICE_PID + ")";
 
-  private final CloudService service;
+  private CloudService service;
   private final HttpService httpService;
 
   @Activate
-  public AwsStatusServlet(@Reference HttpService httpService, @Reference(target = AWS_SVC_FILTER) CloudService service)
+  public AwsStatusServlet(@Reference HttpService httpService)
     throws ServletException, NamespaceException {
-
-    this.service = service;
     this.httpService = httpService;
     this.httpService.registerServlet("/service/aws", this, null, httpService.createDefaultHttpContext());
   }
@@ -70,5 +70,14 @@ public class AwsStatusServlet extends HttpServlet {
     }
 
     resp.getWriter().println("</pre>");
+  }
+
+  @Reference(policy = ReferencePolicy.DYNAMIC, target = AWS_SVC_FILTER, cardinality = ReferenceCardinality.OPTIONAL)
+  public void setService(CloudService service) {
+    this.service = service;
+  }
+
+  public void unsetService(CloudService service) {
+    this.service = null;
   }
 }

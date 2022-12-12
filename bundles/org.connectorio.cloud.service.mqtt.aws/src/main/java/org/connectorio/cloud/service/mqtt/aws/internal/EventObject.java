@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class EventObject {
 
   private String name;
+
+  private String label;
   private String[] tags;
   private StateObject state;
   private Long timestamp;
@@ -37,6 +39,14 @@ public class EventObject {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   public String[] getTags() {

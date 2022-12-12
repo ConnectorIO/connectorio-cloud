@@ -108,6 +108,10 @@ public class MqttItemStateEventListener implements EventSubscriber {
     if (!publisher.isDynamicTopic()) {
       eventObject.setName(item);
     }
+    Item itemObj = itemRegistry.get(item);
+    if (itemObj != null) {
+      eventObject.setLabel(itemObj.getLabel());
+    }
     return eventObject;
   }
 
