@@ -43,6 +43,12 @@
     <release.repository-id>co7io-public-releases</release.repository-id>
     <release.repository-name>ConnectorIO Public Releases</release.repository-name>
     <release.repository-url>https://repository.connectorio.cloud/repository/co7io-public-releases/</release.repository-url>
+
+    <sonar.projectKey>ConnectorIO_connectorio-cloud</sonar.projectKey>
+    <sonar.organization>connectorio</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <!-- keeps sonar happy with java 11 -->
+    <sonar.scanner.force-deprecated-java-version>true</sonar.scanner.force-deprecated-java-version>
   </properties>
 
   <modules>
