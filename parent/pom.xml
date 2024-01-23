@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.connectorio.cloud</groupId>
     <artifactId>connectorio-cloud</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
