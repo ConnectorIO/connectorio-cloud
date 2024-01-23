@@ -38,7 +38,8 @@
     <compiler.target>11</compiler.target>
 
     <slf4j.version>1.7.12</slf4j.version>
-    <openhab.version>3.0.4-connectorio-1</openhab.version>
+    <openhab.version>3.0.4</openhab.version>
+    <thing4-bom.version>${openhab.version}</thing4-bom.version>
     <karaf.version>4.2.8</karaf.version>
 
     <nimbusds-jose-jwt.version>9.15.2</nimbusds-jose-jwt.version>
@@ -59,6 +60,14 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.thing4.openhab.bom.generated</groupId>
+        <artifactId>org.openhab.core.bom.openhab-core</artifactId>
+        <version>${thing4-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.connectorio.cloud</groupId>
         <artifactId>org.connectorio.cloud.device.auth</artifactId>
@@ -195,32 +204,6 @@
         <type>xml</type>
       </dependency>
       -->
-
-      <dependency>
-        <groupId>org.openhab.core.bundles</groupId>
-        <artifactId>org.openhab.core</artifactId>
-        <version>${openhab.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bundles</groupId>
-        <artifactId>org.openhab.core.id</artifactId>
-        <version>${openhab.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bundles</groupId>
-        <artifactId>org.openhab.core.config.discovery</artifactId>
-        <version>${openhab.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bundles</groupId>
-        <artifactId>org.openhab.core.io.transport.mqtt</artifactId>
-        <version>${openhab.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bundles</groupId>
-        <artifactId>org.openhab.core.transform</artifactId>
-        <version>${openhab.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>commons-codec</groupId>
@@ -391,5 +374,62 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>openhab</id>
+
+
+      <repositories>
+        <repository>
+          <id>openhab-release</id>
+          <name>openhab-release</name>
+          <url>https://openhab.jfrog.io/openhab/libs-release</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>openhab-snapshot</id>
+          <name>openhab-snapshot</name>
+          <url>https://openhab.jfrog.io/openhab/libs-snapshot</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+
+      <pluginRepositories>
+        <pluginRepository>
+          <id>openhab-release</id>
+          <name>openhab-releass</name>
+          <url>https://openhab.jfrog.io/openhab/libs-release</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>openhab-snapshot</id>
+          <name>openhab-snapshot</name>
+          <url>https://openhab.jfrog.io/openhab/libs-snapshot</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
 
 </project>

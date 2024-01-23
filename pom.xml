@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.connectorio</groupId>
     <artifactId>connectorio-oss</artifactId>
-    <version>3</version>
+    <version>5-SNAPSHOT</version>
     <relativePath />
   </parent>
 
@@ -35,6 +35,16 @@
   <name>ConnectorIO Cloud</name>
   <description>ConnectorIO Cloud extensions on top of openHAB core.</description>
 
+  <properties>
+    <snapshot.repository-id>co7io-public-snapshots</snapshot.repository-id>
+    <snapshot.repository-name>ConnectorIO Public Snapshots</snapshot.repository-name>
+    <snapshot.repository-url>https://repository.connectorio.cloud/repository/co7io-public-snapshots/</snapshot.repository-url>
+
+    <release.repository-id>co7io-public-releases</release.repository-id>
+    <release.repository-name>ConnectorIO Public Releases</release.repository-name>
+    <release.repository-url>https://repository.connectorio.cloud/repository/co7io-public-releases/</release.repository-url>
+  </properties>
+
   <modules>
     <module>parent</module>
     <module>bundles</module>
@@ -45,7 +55,34 @@
     <connection>scm:git:git@github.com:ConnectorIO/connectorio-cloud.git</connection>
     <developerConnection>scm:git:git@github.com:ConnectorIO/connectorio-cloud.git</developerConnection>
     <url>https://github.com/ConnectorIO/connectorio-cloud</url>
-    <tag>connectorio-cloud-0.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
+
+  <profiles>
+    <profile>
+      <id>sonatype-oss</id>
+
+      <activation>
+        <property>
+          <name>cicd</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <repositories>
+        <repository>
+          <id>sonatype</id>
+          <name>Sonatype OSS snapshots</name>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 
 </project>
