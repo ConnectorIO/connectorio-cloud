@@ -61,7 +61,9 @@ public class SetupTokenListener implements DeviceAuthenticationCallback {
     File file = new File(new File(System.getProperty("karaf.etc")), factoryPid + ".cfg");
 
     props.putAll(properties);
-    props.store(new FileOutputStream(file), "Generated at " + new Date());
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      props.store(fos, "Generated at " + new Date());
+    }
   }
 
 }

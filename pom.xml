@@ -45,10 +45,12 @@
     <release.repository-url>https://repository.connectorio.cloud/repository/co7io-public-releases/</release.repository-url>
 
     <sonar.projectKey>ConnectorIO_connectorio-cloud</sonar.projectKey>
+    <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     <sonar.organization>connectorio</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <!-- keeps sonar happy with java 11 -->
     <sonar.scanner.force-deprecated-java-version>true</sonar.scanner.force-deprecated-java-version>
+    <sonar.scanner.force-deprecated-java-version-grace-period>true</sonar.scanner.force-deprecated-java-version-grace-period>
   </properties>
 
   <modules>
