@@ -2,7 +2,7 @@ name: Build pushed commit
 
 on:
   push:
-    branches: [ "master" , "3.*", "4.*" ]
+    branches: [ "master", "3.*", "4.*" ]
 
 jobs:
   build:
@@ -17,5 +17,7 @@ jobs:
       openhab: true
       server_id: co7io-public-snapshots
       deploy: true
-      master_branch: 3
-      additional_profiles: 'openhab'
+      skip_test_publish: false
+      additional_profiles: 'thing4,openhab'
+      master_branch: '3'
+

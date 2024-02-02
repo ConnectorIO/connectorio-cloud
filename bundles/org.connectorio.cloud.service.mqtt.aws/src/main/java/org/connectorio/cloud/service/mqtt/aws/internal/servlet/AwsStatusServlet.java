@@ -39,7 +39,7 @@ public class AwsStatusServlet extends HttpServlet {
 
   public static final String AWS_SVC_FILTER = "(" + Constants.SERVICE_PID + "=" + AwsMqttService.SERVICE_PID + ")";
 
-  private CloudService service;
+  private CloudService service; // NOSONAR
   private final HttpService httpService;
 
   @Activate

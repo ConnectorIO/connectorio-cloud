@@ -31,9 +31,9 @@ jobs:
       CI_RELEASE_PASSWORD: ${{ secrets.CI_RELEASE_PASSWORD }}
     with:
       openhab: true
-      server_id: co7io-public-releases
-      additional_profiles: 'openhab'
+      server_id: 'co7io-public-releases'
       release_version: ${{ inputs.release_version }}
       development_version: ${{ inputs.development_version }}
       perform_version: ${{ inputs.perform_version }}
       dry_run: ${{ inputs.dry_run }}
+      additional_profiles: 'thing4,openhab'

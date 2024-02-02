@@ -263,7 +263,8 @@ public class NimbusDeviceAuthenticator implements DeviceAuthenticator {
         logger.trace("Sleep a bit");
         Thread.sleep(TimeUnit.SECONDS.toMillis(interval));
       } catch (InterruptedException e) {
-        throw new RuntimeException("Could not complete operation", e);
+        logger.warn("Could not complete operation", e);
+        Thread.currentThread().interrupt();
       }
     }
   }
